@@ -1,16 +1,19 @@
-import flatgraph.help.Table.AvailableWidthProvider
-import flatgraph.help.{DocSearchPackages, Table}
-import flatgraph.{DiffGraphApplier, GNode}
+import flatgraph.algorithm.PathFinder
+import flatgraph.algorithm.PathFinder.Path
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-import testdomains.simple.SimpleDomain
 import testdomains.simple.Language.*
+import testdomains.simple.SimpleDomain
 import testdomains.simple.edges.ConnectedTo
 import testdomains.simple.nodes.{NewThing, Thing}
 
-import scala.collection.mutable
-
-/** Demonstrates usage of generated domain classes for `Simple` domain based on schema in `testdomains.Simple.schema`
+/**
+ * Demonstrates usage of generated domain specific graph api our `SimpleDomain` based on schema
+ * in `testdomains.Simple.schema`, including repeat and path-aware steps.
+ * We also show some some generic graph steps that you can use independently of your domain.
+ *
+ * For more and more detailed usage take a look at e.g.
+ * https://github.com/joernio/flatgraph/tree/master/tests/src/test/scala/flatgraph
  */
 class SimpleDomainTests extends AnyWordSpec {
 
@@ -51,11 +54,12 @@ class SimpleDomainTests extends AnyWordSpec {
     simpleDomain.thing.order(2).name.l shouldBe List("R1", "R2", "R3")
     simpleDomain.thing.orderGte(1).size shouldBe 6
 
-    // TODO where step
+    // where step filters by a a traversal
+    simpleDomain.thing.where(_.connectedTo.name("R3")).name.l shouldBe List("R2")
     // TODO other basic steps - go through api
   }
 
-  "repeat steps" in {
+  "repeat step" in {
     def center = simpleDomain.thing.name("Center")
 
     // by default we return only the final elements (if any)
@@ -70,30 +74,48 @@ class SimpleDomainTests extends AnyWordSpec {
 
     // repeat/until
     center.repeat(_.connectedTo)(_.until(_.name(".*2")).emit).name.l shouldBe List("Center", "L1", "L2", "R1", "R2")
+  }
 
+  "path tracking with step" in {
+    def center = simpleDomain.thing.name("Center")
+
+    center
+      .enablePathTracking
+      .connectedTo
+      .connectedTo
+      .path.l.map { path =>
+      path.map { case t: Thing => t.name }
+    } shouldBe List(
+      Vector("Center", "L1", "L2"),
+      Vector("Center", "R1", "R2")
+    )
+
+    // also works with `repeat` step
+    center
+      .enablePathTracking
+      .repeat(_.connectedTo)(_.maxDepth(2))
+      .path.l.map { path =>
+        path.map { case t: Thing => t.name }
+      } shouldBe List(
+      Vector("Center", "L1", "L2"),
+      Vector("Center", "R1", "R2")
+    )
+  }
+
+  "path finder" in {
+    val Seq(center, l1, l2, r1, r2, r3) = simpleDomain.thing.sortBy(_.name).l
+    PathFinder(l1, r3) shouldBe Seq(Path(Seq(l1, center, r1, r2, r3)))
   }
 
   "generic graph api" in {
+    // these work irrespective of your domain
     simpleDomain.graph.nodeCount shouldBe 6
     simpleDomain.graph.edgeCount shouldBe 5
     simpleDomain.graph.nodes().label.toSet shouldBe Set(Thing.Label)
 
-    val center = simpleDomain.graph.nodes().filter(_.property(Thing.PropertyKeys.Name) == "Center").next()
+    val center = simpleDomain.graph.nodes().filter(_.propertyOption("name") == Some("Center")).next()
     center.outE.size shouldBe 2
     center.inE.size shouldBe 0
-    center.out(ConnectedTo.Label).property(Thing.PropertyKeys.Name).sorted shouldBe List("L1", "R1")
+    center.out(ConnectedTo.Label).property[String]("name").sorted shouldBe List("L1", "R1")
   }
-
-  // TODO path step - including repeat path:
-  //    "work in combination with path" in {
-  //      centerTrav.enablePathTracking
-  //        .repeat(_.out)(_.until(_.property(StringMandatory).filter(_ == "R2")).maxDepth(2))
-  //        .path
-  //        .filter(_.last == r2)
-  //        .l shouldBe Seq(Vector(center, r1, r2))
-  //    }
-
-  // TODO algorithms demo
-  // TODO link to flatgraph traversaltests
-
 }
