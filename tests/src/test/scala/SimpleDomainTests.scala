@@ -1,3 +1,4 @@
+import flatgraph.{BatchedUpdateInterface, DNode, GNode}
 import flatgraph.algorithm.PathFinder
 import flatgraph.algorithm.PathFinder.Path
 import org.scalatest.matchers.should.Matchers.*

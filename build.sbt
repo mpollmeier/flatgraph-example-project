@@ -1,6 +1,6 @@
 name := "flatgraph-example-project"
 ThisBuild/organization := "io.joern"
-ThisBuild/scalaVersion := "3.4.1"
+ThisBuild/scalaVersion := "3.4.2"
 
 // n.b.1: you can manually update the version or run ./updateDependencies.sh
 // n.b.2: this is read by project/plugins.sbt
