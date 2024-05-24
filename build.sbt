@@ -4,7 +4,7 @@ ThisBuild/scalaVersion := "3.4.2"
 
 // n.b.1: you can manually update the version or run ./updateDependencies.sh
 // n.b.2: this is read by project/plugins.sbt
-val flatgraphVersion = "0.0.56+3-6dd4f14f"
+val flatgraphVersion = "0.0.60"
 
 lazy val schema = project
   .in(file("schema"))
@@ -13,14 +13,14 @@ lazy val schema = project
     libraryDependencies += "io.joern" %% "flatgraph-domain-classes-generator" % flatgraphVersion,
     generateDomainClasses/classWithSchema := "testdomains.Simple$", // `$` for the companion object
     generateDomainClasses/fieldName := "schema",
-    generateDomainClasses/outputDir := generatedDomainClassesDir,
+    generateDomainClasses/outputDir := (ThisBuild / baseDirectory).value / generatedDomainClassesDirName,
   )
 
 lazy val domainClasses = project
   .in(file("domain-classes"))
   .settings(
     libraryDependencies += "io.joern" %% "flatgraph-core" % flatgraphVersion,
-    Compile/unmanagedSourceDirectories += generatedDomainClassesDir,
+    Compile/unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / generatedDomainClassesDirName,
     Compile/compile := (Compile/compile).dependsOn(schema/Compile/generateDomainClasses).value,
 
     /* generated sources occasionally have some warnings..
@@ -39,4 +39,4 @@ lazy val tests = project
     )
   )
 
-val generatedDomainClassesDir = file("domain-classes/src/main/scala/generated")
+val generatedDomainClassesDirName = "domain-classes/src/main/scala/generated"
