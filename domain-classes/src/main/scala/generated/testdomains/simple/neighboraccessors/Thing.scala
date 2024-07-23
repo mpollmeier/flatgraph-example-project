@@ -1,18 +1,18 @@
 package testdomains.simple.neighboraccessors
 
 import testdomains.simple.nodes
-import testdomains.simple.Language.*
+import testdomains.simple.language.*
 
 final class AccessNeighborsForThing(val node: nodes.Thing) extends AnyVal {
 
   /** Traverse to thing via connected_to IN edge.
     */
-  def thingViaConnectedToIn: Iterator[nodes.Thing] = connectedToIn.collectAll[nodes.Thing]
+  def _thingViaConnectedToIn: Iterator[nodes.Thing] = connectedToIn.collectAll[nodes.Thing]
 
   /** Connected neighbor thing Traverse to thing via connected_to OUT edge.
     */
   @deprecated("please use connectedTo instead")
-  def thingViaConnectedToOut: Iterator[nodes.Thing] = connectedTo
+  def _thingViaConnectedToOut: Iterator[nodes.Thing] = connectedTo
 
   /** Connected neighbor thing Traverse to thing via connected_to OUT edge.
     */
@@ -27,7 +27,7 @@ final class AccessNeighborsForThingTraversal(val traversal: Iterator[nodes.Thing
 
   /** Traverse to thing via connected_to IN edge.
     */
-  def thingViaConnectedToIn: Iterator[nodes.Thing] = traversal.flatMap(_.thingViaConnectedToIn)
+  def _thingViaConnectedToIn: Iterator[nodes.Thing] = traversal.flatMap(_._thingViaConnectedToIn)
 
   /** Connected neighbor thing Traverse to thing via connected_to OUT edge.
     */
@@ -36,7 +36,7 @@ final class AccessNeighborsForThingTraversal(val traversal: Iterator[nodes.Thing
   /** Connected neighbor thing Traverse to thing via connected_to OUT edge.
     */
   @deprecated("please use connectedTo instead")
-  def thingViaConnectedToOut: Iterator[nodes.Thing] = traversal.flatMap(_.thingViaConnectedToOut)
+  def _thingViaConnectedToOut: Iterator[nodes.Thing] = traversal.flatMap(_._thingViaConnectedToOut)
 
   def connectedToIn: Iterator[nodes.Thing] = traversal.flatMap(_.connectedToIn)
 

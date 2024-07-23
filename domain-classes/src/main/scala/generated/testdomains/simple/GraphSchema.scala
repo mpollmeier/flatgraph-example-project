@@ -1,7 +1,5 @@
 package testdomains.simple
 
-import testdomains.simple.nodes
-import testdomains.simple.edges
 import flatgraph.FormalQtyType
 
 object GraphSchema extends flatgraph.Schema {
@@ -34,6 +32,14 @@ object GraphSchema extends flatgraph.Schema {
     nodePropertyDescriptors(6) = FormalQtyType.StringType // thing.string_list
     nodePropertyDescriptors(7) = FormalQtyType.QtyMulti
     nodePropertyDescriptors
+  }
+  private val newNodeInsertionHelpers: Array[flatgraph.NewNodePropertyInsertionHelper] = {
+    val _newNodeInserters = new Array[flatgraph.NewNodePropertyInsertionHelper](8)
+    _newNodeInserters(0) = nodes.NewThing.InsertionHelpers.NewNodeInserter_Thing_description
+    _newNodeInserters(2) = nodes.NewThing.InsertionHelpers.NewNodeInserter_Thing_name
+    _newNodeInserters(4) = nodes.NewThing.InsertionHelpers.NewNodeInserter_Thing_order
+    _newNodeInserters(6) = nodes.NewThing.InsertionHelpers.NewNodeInserter_Thing_stringList
+    _newNodeInserters
   }
   override def getNumberOfNodeKinds: Int                          = 1
   override def getNumberOfEdgeKinds: Int                          = 1
@@ -72,4 +78,7 @@ object GraphSchema extends flatgraph.Schema {
   override def getNodePropertyFormalQuantity(nodeKind: Int, propertyKind: Int): FormalQtyType.FormalQuantity = nodePropertyDescriptors(
     1 + propertyOffsetArrayIndex(nodeKind, propertyKind)
   ).asInstanceOf[FormalQtyType.FormalQuantity]
+
+  override def getNewNodePropertyInserter(nodeKind: Int, propertyKind: Int): flatgraph.NewNodePropertyInsertionHelper =
+    newNodeInsertionHelpers(propertyOffsetArrayIndex(nodeKind, propertyKind))
 }

@@ -4,7 +4,7 @@ ThisBuild/scalaVersion := "3.4.2"
 
 // n.b.1: you can manually update the version or run ./updateDependencies.sh
 // n.b.2: this is read by project/plugins.sbt
-val flatgraphVersion = "0.0.60"
+val flatgraphVersion = "0.0.81"
 
 lazy val schema = project
   .in(file("schema"))
@@ -19,7 +19,7 @@ lazy val schema = project
 lazy val domainClasses = project
   .in(file("domain-classes"))
   .settings(
-    libraryDependencies += "io.joern" %% "flatgraph-core" % flatgraphVersion,
+    libraryDependencies += "io.joern" %% "flatgraph-help" % flatgraphVersion,
     Compile/unmanagedSourceDirectories += (ThisBuild / baseDirectory).value / generatedDomainClassesDirName,
     Compile/compile := (Compile/compile).dependsOn(schema/Compile/generateDomainClasses).value,
 
@@ -34,9 +34,11 @@ lazy val tests = project
   .dependsOn(domainClasses)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.2.17" % Test,
-      "org.slf4j" % "slf4j-simple" % "2.0.7" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+      "org.slf4j" % "slf4j-simple" % "2.0.13" % Test,
     )
   )
 
 val generatedDomainClassesDirName = "domain-classes/src/main/scala/generated"
+
+Global / onChangedBuildSource := ReloadOnSourceChanges

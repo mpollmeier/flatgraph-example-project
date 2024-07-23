@@ -2,7 +2,7 @@ package testdomains.simple
 import flatgraph.{DiffGraphApplier, DiffGraphBuilder}
 import flatgraph.help.DocSearchPackages
 import flatgraph.help.Table.AvailableWidthProvider
-import Language.*
+import testdomains.simple.language.*
 
 object SimpleDomain {
   val defaultDocSearchPackage = DocSearchPackages.default.withAdditionalPackage(getClass.getPackage.getName)
@@ -62,6 +62,11 @@ class SimpleDomainNodeStarters(val wrappedSimpleDomain: SimpleDomain) {
 
   @flatgraph.help.Doc(info = "all nodes")
   def all: Iterator[nodes.StoredNode] = wrappedSimpleDomain.graph.allNodes.asInstanceOf[Iterator[nodes.StoredNode]]
+
+  def id(nodeId: Long): Iterator[nodes.StoredNode] =
+    Option(wrappedSimpleDomain.graph.node(nodeId)).iterator.asInstanceOf[Iterator[nodes.StoredNode]]
+
+  def ids(nodeIds: Long*): Iterator[nodes.StoredNode] = nodeIds.iterator.flatMap(id)
 
   /** */
   @flatgraph.help.Doc(info = """""")

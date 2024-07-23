@@ -1,10 +1,10 @@
-import flatgraph.{BatchedUpdateInterface, DNode, GNode}
 import flatgraph.algorithm.PathFinder
 import flatgraph.algorithm.PathFinder.Path
+import flatgraph.help.DocSearchPackages
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-import testdomains.simple.Language.*
-import testdomains.simple.SimpleDomain
+import testdomains.simple.*
+import testdomains.simple.language.*
 import testdomains.simple.edges.ConnectedTo
 import testdomains.simple.nodes.{NewThing, Thing}
 
@@ -75,6 +75,24 @@ class SimpleDomainTests extends AnyWordSpec {
 
     // repeat/until
     center.repeat(_.connectedTo)(_.until(_.name(".*2")).emit).name.l shouldBe List("Center", "L1", "L2", "R1", "R2")
+  }
+
+  "group/groupCount steps" in {
+    // which label occurs how often?
+    simpleDomain.all.label.groupCount shouldBe Map("thing" -> 6)
+
+    // groupCount length of `name` property
+    simpleDomain.thing.groupCount(_.name.length) shouldBe Map(
+      2 -> 5, // 5 nodes have a name property of length 2: L1, L2, R1, R2
+      6 -> 1  // 1 node has a name property of length 6: Center
+    )
+
+    // group the node names by their number of outgoing edges
+    simpleDomain.thing.groupMap(_.connectedTo.size)(_.name) shouldBe Map(
+      0 -> List("L2", "R3"), // our outermost nodes naturally don't have outgoing edges
+      1 -> List("L1", "R1", "R2"),
+      2 -> List("Center") // center node is connected to L1 and R1
+    )
   }
 
   "path tracking with step" in {

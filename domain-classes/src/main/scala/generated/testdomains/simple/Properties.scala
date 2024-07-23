@@ -1,6 +1,6 @@
 package testdomains.simple
 
-object PropertyKeys {
+object Properties {
   val Description = flatgraph.OptionalPropertyKey[String](kind = 0, name = "description")
 
   val Name = flatgraph.SinglePropertyKey[String](kind = 1, name = "name", default = "<empty>")
