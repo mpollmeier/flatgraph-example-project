@@ -3,9 +3,9 @@ name := "flatgraph-example-project"
 ThisBuild/organization := "io.joern"
 ThisBuild/scalaVersion := "3.4.2"
 
-// n.b.1: you can manually update the version or run ./updateDependencies.sh
-// n.b.2: this is read by project/plugins.sbt
-val flatgraphVersion = "0.0.81"
+// run `./updateDependencies.sh` to update this version
+// this is read by project/plugins.sbt
+val flatgraphVersion = "0.0.83"
 
 lazy val schema = project.in(file("schema"))
   .enablePlugins(FlatgraphCodegenSbtPlugin)

@@ -13,7 +13,7 @@ import testdomains.simple.nodes.{NewThing, Thing}
  * in `testdomains.Simple.schema`, including repeat and path-aware steps.
  * We also show some some generic graph steps that you can use independently of your domain.
  *
- * For more and more detailed usage take a look at e.g.
+ * Many more tests for a very similar domain are at
  * https://github.com/joernio/flatgraph/tree/master/tests/src/test/scala/flatgraph
  */
 class SimpleDomainTests extends AnyWordSpec {
@@ -57,7 +57,6 @@ class SimpleDomainTests extends AnyWordSpec {
 
     // where step filters by a a traversal
     simpleDomain.thing.where(_.connectedTo.name("R3")).name.l shouldBe List("R2")
-    // TODO other basic steps - go through api
   }
 
   "repeat step" in {
@@ -69,6 +68,7 @@ class SimpleDomainTests extends AnyWordSpec {
 
     // use `emit` modifier to control what's emitted along the way
     center.repeat(_.connectedTo)(_.maxDepth(2).emit).name.l shouldBe List("Center", "L1", "L2", "R1", "R2")
+    center.repeat(_.connectedTo)(_.emit(_.name("L.*"))).name.l shouldBe List("L1", "L2")
 
     // defaults to depth first search (DFS), but can also do breadth first search (BFS)
     center.repeat(_.connectedTo)(_.maxDepth(2).emit.breadthFirstSearch).name.l shouldBe List("Center", "L1", "R1", "L2", "R2")
@@ -124,6 +124,18 @@ class SimpleDomainTests extends AnyWordSpec {
   "path finder" in {
     val Seq(center, l1, l2, r1, r2, r3) = simpleDomain.thing.sortBy(_.name).l
     PathFinder(l1, r3) shouldBe Seq(Path(Seq(l1, center, r1, r2, r3)))
+  }
+
+  "or step returns results if at least one condition is met" in {
+    def center = simpleDomain.thing.name("Center")
+
+    center.out.or(_.label(Thing.Label)).size shouldBe 2
+    center.out.or(_.label("does not exist")).size shouldBe 0
+
+    center.out
+      .or(_.label("does not exist"), _.has(Thing.PropertyNames.Name, "R1"))
+      .property(Thing.Properties.Name)
+      .l shouldBe Seq("R1")
   }
 
   "generic graph api" in {
